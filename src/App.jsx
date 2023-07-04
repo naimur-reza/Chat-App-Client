@@ -4,13 +4,13 @@ import { io } from "socket.io-client";
 const socket = io.connect("http://localhost:5000");
 const App = () => {
   const [message, setMessage] = useState("");
-  const [data, setData] = useState("");
+  const [messageList, setMessageList] = useState([]);
   const [room, setRoom] = useState("");
+
   const sendMessage = () => {
     socket.emit("send_message", { message: message, room: room });
   };
 
-  // sockets for joining room
   const joinRoom = () => {
     if (room !== "") {
       socket.emit("join_room", room);
@@ -19,9 +19,13 @@ const App = () => {
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
-      setData(data);
+      setMessageList((previousMessages) => [...previousMessages, data.message]);
     });
+    return () => {
+      socket.disconnect();
+    };
   }, [socket]);
+
   return (
     <div>
       <input
@@ -36,7 +40,11 @@ const App = () => {
         placeholder="message..."
       />
       <button onClick={sendMessage}>Send Message</button>
-      <ul>{data.message}</ul>
+      <ul>
+        {messageList.map((message, index) => (
+          <li key={index}>{message}</li>
+        ))}
+      </ul>
     </div>
   );
 };
