@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
 // const socket = io.connect("https://chatapp-server-naimur-reza.vercel.app");
-const socket = io("https://chatapp-server-naimur-reza.vercel.app", {
+const socket = io("http://localhost:5000", {
   withCredentials: true,
 });
 const App = () => {
@@ -13,20 +13,24 @@ const App = () => {
   const [room, setRoom] = useState("");
   console.log(messageList);
   const sendMessage = async () => {
-    await socket.emit("send_message", {
-      message: message,
-      room: room,
-      author: name,
-      time:
-        new Date(Date.now()).getHours() +
-        ":" +
-        new Date(Date.now()).getMinutes(),
-    });
+    if (message !== "") {
+      await socket.emit("send_message", {
+        message: message,
+        room: room,
+        author: name,
+        time:
+          new Date(Date.now()).getHours() +
+          ":" +
+          new Date(Date.now()).getMinutes(),
+      });
+    }
   };
 
   const joinRoom = () => {
-    socket.emit("join_room", room);
-    setShowMessage(true);
+    if (name !== "" && room !== "") {
+      socket.emit("join_room", room);
+      setShowMessage(true);
+    }
   };
 
   useEffect(() => {
@@ -41,12 +45,27 @@ const App = () => {
 
   const handleForm = (e) => {
     e.preventDefault();
+    const form = e.target;
+    form.reset();
   };
+
+  const chatBoxRef = useRef(null);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messageList]);
+
+  const scrollToBottom = () => {
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    }
+  };
+
   return (
     <div className="h-[100vh]  overflow-y-scroll flex items-center justify-center bg-gradient-to-r from-black via-red-950 to-black px-5">
       <form
         onSubmit={handleForm}
-        className=" p-5 space-y-4 rounded-lg lg:w-1/2 w-full shadow-xl bg-white/5 backdrop-blur-md">
+        className=" p-5 space-y-2 relative rounded-lg lg:w-1/2 w-full shadow-xl bg-white/5 backdrop-blur-md">
         {!showMessage && (
           <h1 className="text-xl font-semibold text-gray-200">
             Please fill these field to start the chat
@@ -57,7 +76,7 @@ const App = () => {
             <input
               required
               type="text"
-              className="bg-gray-300 px-2 py-3 rounded-md text-black placeholder-slate-800 outline-none w-full"
+              className="bg-black/60 w-full px-2 lg:py-3 py-2 rounded-l-md text-gray-100 placeholder-gray-200 outline-none"
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
             />
@@ -65,7 +84,7 @@ const App = () => {
             <input
               required
               type="text"
-              className="bg-gray-300 px-2 py-3 rounded-md text-black placeholder-slate-800 outline-none w-full"
+              className="bg-black/60 w-full px-2 lg:py-3 py-2 rounded-l-md text-gray-100 placeholder-gray-200 outline-none"
               onChange={(e) => setRoom(e.target.value)}
               placeholder="Enter room id"
             />
@@ -84,7 +103,9 @@ const App = () => {
             <h1 className="absolute -top-4 rounded-t-lg right-0 px-5 py-2 text-gray-200 bg-rose-600 w-full animate-pulse">
               Live ChatBox
             </h1>
-            <ul className="space-y-4 h-[400px] overflow-y-scroll px-3">
+            <ul
+              ref={chatBoxRef}
+              className="space-y-4 h-[400px]  overflow-y-scroll scrollbar  px-3">
               {messageList.map((info, index) => (
                 <li key={index}>
                   {" "}
@@ -102,7 +123,7 @@ const App = () => {
                       {info.author[0].toUpperCase()}
                     </p>{" "}
                     <div className="flex flex-col items-center justify-center">
-                      <p className="mt-4 bg-white/20 text-white w-fit px-3 py-1 rounded-full">
+                      <p className="mt-4 break-words bg-white/20 text-white w-fit px-3 py-1 rounded-full">
                         {info.message}
                       </p>
                       <span className="text-xs  text-gray-300">
@@ -118,7 +139,7 @@ const App = () => {
                 type="text"
                 required
                 className="bg-black/60 w-full px-2 lg:py-3 py-2 rounded-l-md text-gray-100 placeholder-gray-200 outline-none "
-                onChange={(e) => setMessage(e.target.value)}
+                onBlur={(e) => setMessage(e.target.value)}
                 placeholder="message..."
               />
               <br />
