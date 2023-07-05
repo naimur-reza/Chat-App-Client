@@ -6,6 +6,7 @@ const socket = io("http://localhost:5000", {
   withCredentials: true,
 });
 const App = () => {
+  const [connectedUsers, setConnectedUsers] = useState([]);
   const [message, setMessage] = useState("");
   const [name, setName] = useState("");
   const [messageList, setMessageList] = useState([]);
@@ -41,6 +42,10 @@ const App = () => {
     // return () => {
     //   socket.disconnect();
     // };
+
+    socket.on("user_connected", (data) => {
+      setConnectedUsers((connectedUsers) => [...connectedUsers, data]);
+    });
   }, [socket]);
 
   const handleForm = (e) => {
@@ -60,7 +65,7 @@ const App = () => {
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
   };
-
+  console.log(connectedUsers);
   return (
     <div className="h-[100vh]  overflow-y-scroll flex items-center justify-center bg-gradient-to-r from-black via-red-950 to-black px-5">
       <form
