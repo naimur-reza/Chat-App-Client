@@ -32,7 +32,7 @@ const App = () => {
     if (name !== "" && room !== "") {
       await socket.emit("join_room", { room: room, author: name });
       setShowMessage(true);
-      socket.on("joined_user", ({ room, author }) => {
+      socket.on("joined_user", ({ joinedRoom, author }) => {
         console.log(joinedRoom, author);
         if (joinedRoom === room) {
           toast(`${author} connected, Welcome!`, {
