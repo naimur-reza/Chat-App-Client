@@ -32,16 +32,18 @@ const App = () => {
     if (name !== "" && room !== "") {
       await socket.emit("join_room", { room: room, author: name });
       setShowMessage(true);
-      socket.emit("joined_user", (author) => {
-        console.log(author);
-        toast(`${author} connected, Welcome!`, {
-          icon: "👏",
-          style: {
-            borderRadius: "10px",
-            background: "#333",
-            color: "#fff",
-          },
-        });
+      socket.on("joined_user", ({ room, author }) => {
+        console.log(joinedRoom, author);
+        if (joinedRoom === room) {
+          toast(`${author} connected, Welcome!`, {
+            icon: "👏",
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          });
+        }
       });
     }
   };
@@ -122,7 +124,8 @@ const App = () => {
                 Live ChatBox
               </h1>
               <p className="w-full text-end text-gray-200 font-semibold">
-                Connected Users: {connectedUsers}
+                <span className="text-green-200 ">&#x2022;</span> Connected
+                Users: {connectedUsers}
               </p>
             </div>
             <ul
