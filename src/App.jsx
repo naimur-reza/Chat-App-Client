@@ -81,14 +81,22 @@ const App = () => {
             <h1 className="absolute -top-4 rounded-t-lg right-0 px-5 py-2 text-gray-200 bg-rose-600 w-full animate-pulse">
               Live ChatBox
             </h1>
-            <ul className="space-y-6 h-[400px] overflow-y-scroll">
+            <ul className="space-y-4 h-[400px] overflow-y-scroll px-3">
               {messageList.map((info, index) => (
                 <li key={index}>
                   {" "}
-                  <div className="flex  gap-1 items-center">
+                  <div
+                    className={`flex  gap-1 items-center ${
+                      name === info.author
+                        ? "justify-end"
+                        : "justify-start flex-row"
+                    }`}>
                     {" "}
-                    <p className="bg-pink-500 w-10 h-10 flex items-center justify-center rounded-full text-white">
-                      {info.author[0]}
+                    <p
+                      className={`${
+                        name === info.author ? "hidden" : "bg-sky-500"
+                      } w-10 h-10 flex items-center justify-center rounded-full text-white`}>
+                      {info.author[0].toUpperCase()}
                     </p>{" "}
                     <div className="flex flex-col items-center justify-center">
                       <p className="mt-4 bg-white/20 text-white w-fit px-3 py-1 rounded-full">
@@ -106,7 +114,7 @@ const App = () => {
               <input
                 type="text"
                 required
-                className="bg-gray-300 w-full px-2 lg:py-3 py-2 rounded-l-md text-black placeholder-slate-800 outline-none "
+                className="bg-black/60 w-full px-2 lg:py-3 py-2 rounded-l-md text-gray-100 placeholder-gray-200 outline-none "
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="message..."
               />
