@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { toast } from "react-hot-toast";
 import { io } from "socket.io-client";
 
 // const socket = io.connect("https://chatapp-server-naimur-reza.vercel.app");
@@ -27,10 +28,21 @@ const App = () => {
     }
   };
 
-  const joinRoom = () => {
+  const joinRoom = async () => {
     if (name !== "" && room !== "") {
-      socket.emit("join_room", room);
+      await socket.emit("join_room", { room: room, author: name });
       setShowMessage(true);
+      socket.emit("joined_user", (author) => {
+        console.log(author);
+        toast(`${author} connected, Welcome!`, {
+          icon: "👏",
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        });
+      });
     }
   };
 
@@ -44,7 +56,7 @@ const App = () => {
     // };
 
     socket.on("user_connected", (data) => {
-      setConnectedUsers((connectedUsers) => [...connectedUsers, data]);
+      setConnectedUsers(data.length);
     });
   }, [socket]);
 
@@ -105,9 +117,14 @@ const App = () => {
         <br />
         {showMessage && (
           <>
-            <h1 className="absolute -top-4 rounded-t-lg right-0 px-5 py-2 text-gray-200 bg-rose-600 w-full animate-pulse">
-              Live ChatBox
-            </h1>
+            <div className="absolute bg-rose-500 -top-4 rounded-t-lg right-0 px-5 py-2 w-full flex justify-between">
+              <h1 className=" text-gray-200 font-bold  w-full animate-pulse">
+                Live ChatBox
+              </h1>
+              <p className="w-full text-end text-gray-200 font-semibold">
+                Connected Users: {connectedUsers}
+              </p>
+            </div>
             <ul
               ref={chatBoxRef}
               className="space-y-4 h-[400px]  overflow-y-scroll scrollbar  px-3">
